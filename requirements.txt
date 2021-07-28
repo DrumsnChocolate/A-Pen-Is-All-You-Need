@@ -1,0 +1,6 @@
+jupyter
+tensorflow
+numpy
+matplotlib
+pandas
+tensorflow_text

@@ -1,0 +1,155 @@
+openapi: 3.0.1
+info:
+  title: Evaluation API for STABILO's Ubicomp Challenge 2021
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/ubicomp_challenge_21/
+
+paths:
+  /predict:
+    post:
+      tags:
+        - Evaluation
+      description: Post the current person's (labelled) adaptation equations along with their unlabelled validation equations to the recognizer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - adaptation
+                - validation
+              properties:
+                adaptation:
+                  type: array
+                  minItems: 5
+                  maxItems: 5
+                  description: Each item is one equation along with its label
+                  items:
+                    required:
+                      - label
+                      - data
+                    properties:
+                      label:
+                        type: string
+                        example: 123+123=246
+                      data:
+                        type: array
+                        description: ordered sensor sample list of raw values
+                        minItems: 3
+                        items:
+                          $ref: "#/components/schemas/SensorSample"
+                validation:
+                  type: array
+                  description: Each item is one unlabelled equation
+                  minItems: 2
+                  items:
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: array
+                        description: ordered sensor sample list of raw values
+                        minItems: 3
+                        items:
+                          $ref: "#/components/schemas/SensorSample"
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                required:
+                  - hypotheses
+                properties:
+                  hypotheses:
+                    type: array
+                    description: "A list of equation hypotheses in the same order as the validation body parameter. Each hypothesis may only contain the letters 0123456789=+-·:"
+                    minItems: 2
+                    items:
+                      minItems: 1
+                      type: string
+                      example: 123+123=246
+
+components:
+  schemas:
+    SensorSample:
+      type: object
+      required:
+        - a1x
+        - a1y
+        - a1z
+        - a2x
+        - a2y
+        - a2z
+        - gx
+        - gy
+        - gz
+        - mx
+        - my
+        - mz
+        - force
+        - timestamp
+        - counter
+      properties:
+        a1x:
+          type: integer
+          description: Accelerometer 1 - X
+          example: 32768
+        a1y:
+          type: integer
+          description: Accelerometer 1 - Y
+          example: 32768
+        a1z:
+          type: integer
+          description: Accelerometer 1 - Z
+          example: 32768
+        a2x:
+          type: integer
+          description: Accelerometer 2 - X
+          example: 8192
+        a2y:
+          type: integer
+          description: Accelerometer 2 - Y
+          example: 8192
+        a2z:
+          type: integer
+          description: Accelerometer 2 - Z
+          example: 8192
+        gx:
+          type: integer
+          description: Gyroscope - X
+          example: 32768
+        gy:
+          type: integer
+          description: Gyroscope - Y
+          example: 32768
+        gz:
+          type: integer
+          description: Gyroscope - Z
+          example: 32768
+        mx:
+          type: integer
+          description: Magnetometer - X
+          example: 8192
+        my:
+          type: integer
+          description: Magnetometer - Y
+          example: 8192
+        mz:
+          type: integer
+          description: Magnetometer - Z
+          example: 8192
+        force:
+          type: integer
+          description: Force sensor
+          example: 4096
+        counter:
+          type: integer
+          description: Counter, incremented for each incoming sample
+          example: 1
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp (in millis since Unix Epoch) obtained when the sensor sample arrived at the connected Bluetooth device. https://currentmillis.com/
+          example: 1618296419473
